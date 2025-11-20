@@ -1,1 +1,5 @@
-tasdfasasdfasdfas 
+스키마 = 데이터베이스
+
+127.0.0.1 == localhost == 내 PC
+IP : 컴퓨터의 주소 -> 8.8.8.8, 172.xxx.xxx.xxx 
+localhost:80 == 127.0.0.1:80 == 127.0.0.1:3306  -> nginx 1.
