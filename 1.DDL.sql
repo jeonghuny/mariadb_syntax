@@ -55,8 +55,9 @@ select * from information_schema.key_column_usage where table_name='posts';
 -- 테이블 index 조회
 show index from 테이블명;    -- pk, fk 확인가능
 
+제약조건 설정 -> pk, fk, unique
+pk, fk, unique -> 목차페이지 생성 -> index생성
 index : 목차 -> 중요한 데이터를 대상으로 목차만듬
-pk, fk -> index생성
 제약 조건 조회 1) 제약조건테이블 2) index 조회
 
 -- alter : 테이블의 구조를 변경
@@ -84,7 +85,6 @@ alter table post change column content contents varchar(3000);
 
 -- 테이블 삭제
 drop table abc;
-
 
 -- 일련의 쿼리를 실행시킬때 특정 쿼리에서 에러가 나지 않도록 if exists를 많이 사용
 drop table if exists abc;

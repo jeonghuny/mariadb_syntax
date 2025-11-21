@@ -23,7 +23,7 @@ select * from author where name = '홍길동';
 select * from author where id > 2 and name ='hongildong';
 select * from author where id in(1,3,5);
 -- 이름이 홍길동 인 글쓴이가 쓴 글 목록을 조회하시오
-select * from post where id in (select id from author where name ='홍길동');
+select * from post where author_id in (select id from author where name ='홍길동');
 
 -- 중복제거 조회 : distinct
 select name from author;
@@ -31,7 +31,7 @@ select distinct name from author;
 
 -- 정렬 : order by + 컬럼명
 -- asc : 오름차순 , desc : 내림차순, 안붙이면 오름차순(default)
--- 아무런 정렬조건 없이 조회할 경우에는 pk기준 오름차순 // order by  id(pk)
+-- 아무런 정렬조건 없이 조회할 경우에는 pk기준 오름차순 // order by id(pk)
 select * from author order by name desc;
 
 -- 멀티컬럼 order by : 여러컬럼으로 정렬시에, 먼저쓴컬럼 우선정렬하고, 중복시 그다음 컬럼으로 정렬적용.
