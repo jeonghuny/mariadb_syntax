@@ -14,6 +14,7 @@ alter table author add column age tinyint unsigned;
 
 
 -- 제약 조건 삭제(외래키명으로 삭제)
+select * from information_schema.key_column_usage where table_name='post';
 alter table post drop foreign key post_ibfk_1;
 -- 제약조건 추가
 alter table post add constraint post_fk foreign key(author_id) references author(id);
@@ -22,15 +23,14 @@ alter table author modify column id bigint;
 alter table post modify column author_id bigint;
 alter table post modify column id bigint;
 
--- decimal(총자리수, 소수부자리수)
+-- decimal(총자리수, 소수부자리수) 고정소수점(decimal) vs 부동소수점
 alter table author add column height decimal(4,1); // (전체자리수, 소수자리수)
 -- 정상적으로 insert
 insert into author (id, name, email, height) values(7,'홍길동3','sss@naver.com', 175.3)
 -- 데이터가 잘리도록
 
-문자:
 char : 고정길이 -> ab
-varchar : 가변길이, 최대길이지정, 메모리 저장 (조회성능 빠름), 빈번히 조회되는 짧은 길이의 데이터
+varchar : 가변길이, 최대길이지정, 메모리 저장 (조회성능 빠름), 빈번히 조회되는 짧은 길이의 데이터    //  메모리는 스토리지보다 비쌈
 text : 가변길이, 최대길이지정 불가, 스토리지 저장, 빈번히 조회되지 않는 장문의 데이터
    -> 자소서, 소설, contents
 
@@ -68,7 +68,7 @@ insert into post(id, title, contents, author_id, created_time) valuse(4,'hello',
 alter table post modify column created_time datetime default current_timestamp();
 insert into post(id, title, contents, author_id) values(5,'hello','hello..',1);
 
--- 비교연산자
+-- 비교연산자 (!=, <>)
 select * from author where id>=2 and id<=4;
 select * from author where id in(2,3,4);
 select * from author where id between 2 and 4;
@@ -83,7 +83,7 @@ select * from post where title like "%h";
 select * from author where name regexp '[a-z]' --이름에 소문자알파벳이 포함된 경우
 select * from author where name regexp '[가-힣]' --이름에 한글이 포함된 경우
 
--- 타입변환 - cast
+-- 타입변환 - cast(유연함) vs dat_format
 -- 문자 -> 숫자
 select cast('12' as unsigned);
 -- 숫자 -> 날짜
