@@ -59,8 +59,10 @@ select a.* from author a where id in (select author_id from post);
 -- 회원별로 본인의 쓴 글의 개수를 출력. ex)email, post_count
 -- 글 안쓴사람도 0개로 카운트해서 출력.
 select a.email, (select count(*) from post p where p.author_id = a.id) 
-as post_count from author a;
+as post_count from author a order by a.id;
 // 조인보다 성능이 떨어짐
+
+select a.id, count(p.id) from author a left join post p on a.id = p.author_id group by a.id
 
 -- from절 위치에 서브쿼리
 select a.* from (select * from author) as a;
@@ -109,3 +111,23 @@ having count(*) >= 2;
 -- 동명 동물 수 찾기
 -- 카테고리 별 도서 판매량 집계하기
 -- 조건에 맞는 사용자와 총 거래금액 조회하기
+
+
+!!정리 : 서브쿼리는 조인으로 대체 가능
+
+
+-- 다중열 group by
+-- group by 첫번째컬럼, 두번째컬럼 : 첫번째 컬럼으로 grouping이후에 두번째 컬럼으로 grouping
+-- post테이블에서 작성자별로 구분하여 같은 제목의 글의 개수를 출력하시오.
+select author_id, title, count(*) from post group by author_id, title;
+
+-- 재구매가 일어난 상품과 회원 리스트 구하기
+
+인덱스 생성 : id, name, ... 컬럼 
+-> 컬럼을 기준으로 목차 생성
+-> select * from post where id = 897; 
+-> index를 활용하기 위해서는 where 컬럼 = ?;
+-> 인덱스를 생성하면 조회성능향상, 삽입/수정/삭제 성능 하락 (목차페이지도 바뀌기 때문)
+   (조회가 빈번한 경우에 인덱스를 만드는 것이 유리하다.)
+-> 주문내역조회(select * from order_history where member_id = 100);
+-> 삽입, 수정, 삭제 빈번하지 않을까?
