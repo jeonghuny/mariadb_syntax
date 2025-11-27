@@ -1,26 +1,45 @@
+
+[DB 격리수준]
+- DB 동시성 문제를 해결하기 위한 격리수준
+- DB 동시성 문제는 데이터베이스에 여러 트랜잭션이 동시에 접근할 때, 데이터의 일관성과 정확성이 깨질 수 있는 상황
+
 -- read uncommitted : 커밋되지 않은 데이터 read 가능 -> dity read 문제 발생
 ex) A가 재고 100있던거 0으로 만들고 커밋 안한 상태에서, B가 재고 조회하면 0개 임
--- 실습절차
+[실습절차]
 -- 1)워크벤치에서 auto_commit해제. update실행. commit하지 않음(transaction1)
 -- 2)터미널을 열어 select했을때 위 update변경사항이 읽히는지 확인(transactrion2)
 -- 결론 : mariadb는 기본이 repeatable read 이므로 dirty read 발생 x
 
-
--- read committed : 커밋한 데이터만 read 가능 -> Phantom read 발생(또는 non-reapeatable)
+-- read committed : 커밋한 데이터만 read 가능 -> Phantom read 발생(또는 non-reapeatable) // 의도치 않게 두 번 읽으면 값이 바뀌는 현상 발생
+ex) T1: 잔액을 100 → 0으로 바꾸고 커밋함 
+T2: 같은 트랜잭션 안에서 첫 조회 → 100 
+그 사이에 T1이 커밋 -> 두 번째 조회 → 0
+➡ T2는 같은 트랜잭션 안에서도 값이 바뀌어 있음 (Non-Repeatable Read)
 ex) 실시간으로 select 되는 데이터가 다를 수 있음. (그사이 커밋이 발생되어서) : phantom read  // 1로 조회되었다가 2가 됨. (없던 데이터가 나타남)
--- 실습절차
+[실습절차]
 -- 1)워크벤치에서 아래 코드 실행
 start transaction;
 select count(*) from author;
 do sleep(15);
 select count(*) from author;
 commit;
+(같은 SELECT 두 번 해도 값이 달라짐)
+
 -- 2)터미널을 열어 아래 코드 실행
 insert into author(email) values('gggd@naver.com');
 
 -- repeatable read : 읽기의 일관성 보장 -> lost update문제 발생(동시성 이슈) -> 배타lock(배타적 잠금)으로 해결
--- lost update 문제 발생하는 상황
--- 주로 예매사이트에서 동시성 이슈 발생됨. -> 근데 보통 redis로 해결함.
+ex) T1: 잔액을 100 → 0으로 바꾸고 커밋함 
+T2: 같은 트랜잭션 안에서 첫 조회 → 100
+그 사이에 T1이 커밋 -> 두 번째 조회 → 100
+➡ T2는 같은 트랜잭션 안에서 값이 바뀌지 않음 (Repeatable Read)
+➡ 트랜잭션이 끝나기 전까지 데이터는 스냅샷으로 고정됨 (트랜잭션 내에서는 같은 SELECT 결과가 항상 동일함)
+
+트랜잭션 동안 같은 SELECT는 항상 같은 결과를 반환한다. 따라서 Non-Repeatable Read를 해결한다.
+→ lost update 문제 발생하는 상황
+→ 주로 예매사이트에서 동시성 이슈 발생됨. -> 근데 보통 redis로 해결함.
+
+[실습절차]
 DELIMITER //
 create procedure concurrent_test1()
 begin
@@ -35,7 +54,10 @@ end //
 DELIMITER ;
 call concurrent_test1();
 -- 터미널에서는 아래 코드 실행
-select post_count from author where id = 1;
+select post_count from author where id = 1; // 1로 조회됨 , update는 대기(락)에 걸림
+
+-> 트랜잭션이 시작되면 Repeatable Read가 처음 읽은 값을 스냅샷으로 고정하기 때문에,
+15초 동안 다른 트랜잭션에서 값을 바꿔도 트랜잭션 내부에서는 동일한 값(count)만 사용되는 것을 실험하는 코드
 
 -- 배타락을 통해 lost update 문제를 해결한 상황
 -- select for update를 하게 되면 트랜잭션이 실행되는 동안 lock걸리고, 트랜잭션이 종료된 후에 lock풀림
