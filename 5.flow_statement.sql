@@ -12,6 +12,7 @@ select id,
  when name ='hong1' then '홍길동1'
  when name = 'hong2' then '홍길동2'
  else name 
+
  end as name
  from author;
 
