@@ -81,10 +81,49 @@ begin
     -- email로 회원ID 찾기
     select id into a_id from author where email = inputEmail; 
     -- post 테이블에 insert
-    insert into post(title, contents, author_id) values(inputTitle, inputContents, a_id);
+    insert into post(title, contents) values(inputTitle, inputContents);
     -- post 테이블에 insert된 id값 구하기
-    select id into p_id from post where title = inputTitle and contents = inputContents and author_id = a_id; 
+    select id into p_id from post where order by id desc limit 1;
     -- author_post_list테이블에 insert하기(author_id, post_id 필요)
-    insert into author_post_list (author_id, post_id) value(a.id, p.id);
+    insert into author_post_list (author_id, post_id) value(a_id, p_id);
+end
+// delimiter ;
+
+-- 롤백 있는 버전
+
+-- 글쓰기
+delimiter //
+create procedure 글쓰기(in titleInput varchar(255), in contentsInput varchar(255), in emailInput varchar(255))
+begin
+    -- begin밑에 declare를 통해 변수 선언
+    declare authorId bigint;
+    declare postId bigint;
+    -- 아래 declare는 변수선언과는 상관없는 예외관련 특수문법
+    declare exit handler for SQLEXCEPTION
+    begin
+        rollback;
+    end;
+    start transaction;
+        select id into authorId from author where email = emailInput;
+        insert into post(title, contents) values(titleInput, contentsInput);
+        select id into postId from post order by id desc limit 1;
+        insert into author_post_list(author_id, post_id) values(100, postId);
+    commit;
+end
+// delimiter ;
+
+-- 글삭제 -> if else문
+delimiter //
+create procedure 글삭제(in postIdInput bigint, in authorIdInput bigint)
+begin
+    declare authorCount bigint;
+    -- 참여자의 수를 조회
+    select count(*) into authorCount from author_post_list where post_id = postIdInput;
+    if authorCount=1 then
+        delete from author_post_list where post_id=postIdInput and author_id=authorIdInput;
+        delete from post where id=postIdInput;
+    else
+        delete from author_post_list where post_id=postIdInput and author_id=authorIdInput;
+    end if;
 end
 // delimiter ;
