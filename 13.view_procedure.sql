@@ -127,3 +127,63 @@ begin
     end if;
 end
 // delimiter ;
+
+-- 대량글쓰기 -> while문을 통한 반복문 
+delimiter //
+create procedure 글도배(in count bigint, in emailInput varchar(255))
+begin
+    declare authorId bigint;
+    declare postId bigint;
+    declare countValue bigint default 0;
+    while countValue<count do
+        select id into authorId from author where email = emailInput;
+        insert into post(title) values("안녕하세요");
+        select id into postId from post order by id desc limit 1;
+        insert into author_post_list(author_id, post_id) values(100, postId);
+        set countValue = countValue+1;
+    end while;
+end
+// delimiter ;
+
+[DB엔진 종류]
+innoDB는 트랜잭션 지원, 조회성능은 느림 (대부분 이거 씀)
+
+myisam은 트랙잭션 지원x, 조회성능 빠름
+
+1. DB인코딩을 utf설정X했고 테이블을 이미 생성했다면
+2. 테이블마다 utf 설정 해야됨
+
+
+[DB 서버 구성]
+1.클러스터링 : 여러 서버를 묶는다
+2.레플리카 : 복제
+3.샤딩 : 나눈다.
+
+-- 클러스터링
+: 두 개 이상의 DB 서버를 하나의 “묶음(cluster)”으로 구성
+-> 한 서버가 죽어도 다른 서버가 자동으로 서비스 이어받도록 하는 구조
+
+-- 레플리카
+: Primary(주 서버)의 데이터를 1개 이상의 Replica 서버에 복제
+: 데이터가 실시간으로 복제되어야 됨.
+: 조회 트래픽이 훨씬 많은 서비스, DR센터운영
+
+-- 샤딩
+: DB 사이즈가 너무 커지거나 트래픽이 폭증했을 때 데이터를 수평 분할하는 구조.
+: 부하분산
+
+샤딩전략
+1) Hash sharding -> 추가 하면 기존데이터 전부 재조정해야됨 (해쉬함수가 변경)
+2) Dynamic sharding -> 범위가 지정되어있다. 한페이지 추가하면 단점 페이지
+3) UUID
+
+
+[HA전략]
+
+고사용성 : 높은사용성 -> 장애가 없는 사용성
+HA구성 == 서버의 다중화 구성을 의미
+- 서버를 여러개 구성
+
+
+-> 로드밸런서라고도 부르고, HAProxy, 리버스Proxy 라고도 함.
+
