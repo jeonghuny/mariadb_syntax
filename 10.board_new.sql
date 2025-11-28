@@ -129,3 +129,36 @@ select o.id, u.name, u.id, o.order_date, o.order_price, p.product_name, p.seller
 from orders o inner join product_orders_list po on o.id = po.order_id
 inner join user u on u.id = o.user_id
 inner join product p on p.id = po.product_id;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+create table user(id bigint auto_increment primary key, name varchar(200) not null,
+seller_yn enum('y','n') not null, email varchar(200), phone varchar(200),
+pwd varchar(200) not null);
+
+create table product(id bigint auto_increment primary key, product_name varchar(200) not null,
+seller_id bigint not null, stock int not null, price int not null);
+
+create table orders(id bigint auto_increment primary key, success_yn enum('y','n') not null,
+order_date date not null, order_price bigint not null, user_id bigint not null,
+foreign key(user_id) references user(id));
+
+create table product_orders_list(id bigint auto_increment primary key, quantity int not null,
+product_id bigint not null, order_id bigint not null,
+foreign key(product_id) references product(id), foreign key(order_id) references orders(id));
+
+alter table product add constraint foreign key(seller_id) references user(id);
