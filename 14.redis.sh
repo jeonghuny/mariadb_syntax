@@ -1,4 +1,4 @@
-2005/12/01
+<2025/12/01>
 
 -- 인메모리 데이터베이스
 
@@ -24,13 +24,15 @@ redis와 Linux 묶어서 설치 - > 컨테이너
 docker run --name redis-container -d -p 6379:6379 redis
  -d : 백그라운드 옵션
 
-[redis의 자료구조]
-1. 기본자료구조 
+[redis의 자료구조] 에 대해 배움
+1. String자료구조
 "hongildong" : "홍길동"
 2. list자료구조
 "class1" : ["h1","h2"]
-
+3. set자료구조
+4. zset자료구조
 ex) Sorted Sets  = > zset 이라고도 함 (말그대로 정렬된 set)
+5. hashes자료구조
 
 # DEQUE와 리스트 차이점 
 리스트 같은 경우 중간에 데이터가 삽입 되면 인덱스가 달라져서 효율이 떨어진다.
@@ -69,7 +71,8 @@ keys *
 !면접답! 데이터의 양이 적다면 redis를 쓰겠다 -> 그러면 키값은 ? 중복이 안되는 ex)id로 쓰겠다.
 
 # String 자료구조
-# sets 키:value 형식으로 값 세팅
+- set, get, del, incr, decr
+# ses 키:value 형식으로 값 세팅
 set user:email:1 hong@naver.com -> 기본값이 문자열이랑 " " 안붙여도 됨
 set user:email:2 hong2@naver.com -> user:email:1 로 키값 저장하면 덮어쓰게됨 
 # 이미 존재하는 key를 set하면 덮어쓰기 된다
@@ -107,7 +110,8 @@ hashes와 비슷해보이지만 String 형식
 
 로그인에 대한 로직을 빈번한 조회를 하므로 redis 씀
 
-# List 자료구조
+# List 자료구조  (DEQUE의 자료구조와 비슷하다.)
+-- lpush, rpush, lrange, rpop, lpop, llen
 # redis의 list는 deque와 같은 자료구조. 즉, double-ended-queue구조
 lpush students kim1
 lpush students lee1
@@ -140,6 +144,7 @@ lrange user:1:recent:product -3 -1
 
 
 # [set] 
+-- sadd, Srem, smembers, scard, sismember
 # Set 자료구조 : 중복없음,  순서없음
 sadd memberlist m1
 sadd memberlist m2
@@ -158,6 +163,7 @@ sadd likes:posting:1 abc@naver.com # 좋아요를 누른 경우
 srem likes:posting:1 abc@naver.com # 좋아요 취소
 
 # [zset]
+-- zdd, zrange, zrevrange
 # zset 자료구조 : sorted set
 # zset활용 사례1 : 최근본상품목록
 # zset도 set이므로 같은 상품을 add할 경우에 중복이 제거되고, score(시간)값만 업데이트
@@ -173,6 +179,7 @@ zrevrange user:1:recent:product 0 2
 zrevrange user:1:recent:product 0 2 withscores
 
 # [hashes]
+-- hset, hget
 # hashes 자료구조 : value가 map형태의 자료구조 (key:value, key:value, ... 형태의 구조) 
 # set member:info:1 "{\"name\":\"hong\", \"email\":\"hong@daum.net\", \"age\":30}" 과의 비교
 hset member:info:1 name hong email hong@daum.net age 30
